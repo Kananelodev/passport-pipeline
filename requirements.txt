@@ -1,0 +1,7 @@
+# Pinned so your environment is reproducible (a DE habit worth having).
+duckdb==1.1.3
+pandas==2.2.3
+pyyaml==6.0.2
+faker==30.8.2          # for the sample-data generator you'll write
+pytest==8.3.3
+python-dotenv==1.0.1

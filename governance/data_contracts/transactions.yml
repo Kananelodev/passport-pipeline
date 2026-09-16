@@ -1,0 +1,32 @@
+# Data contract for the `transactions` source. Also intentionally incomplete.
+dataset: transactions
+description: Customer transactions.
+primary_key: transaction_id
+
+columns:
+  - name: transaction_id
+    type: string
+    nullable: false
+    unique: true            # duplicates break idempotency — catch them
+  - name: customer_id
+    type: string
+    nullable: false
+    foreign_key: customers.customer_id   # referential integrity check
+  - name: amount_zar
+    type: decimal
+    nullable: false
+    # TODO: must be >= 0
+  - name: currency
+    type: string
+    nullable: false
+    # TODO: allowed values, default 'ZAR'
+  - name: merchant
+    type: string
+    nullable: false
+  - name: txn_timestamp
+    type: timestamp
+    nullable: false
+  - name: processing_region
+    type: string
+    nullable: false
+    # if this != the customer's home_region, it's a cross-border transfer

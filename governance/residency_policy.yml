@@ -1,0 +1,17 @@
+# Residency policy — the "passport rules".
+# Used by govern.py to decide when data has crossed a border and must be logged.
+home_region: af-south-1
+
+# Regions where processing PII is allowed without flagging.
+allowed_regions:
+  - af-south-1
+
+# Regions that are permitted but MUST be recorded as a cross-border transfer.
+# (In reality this is where POPIA transfer conditions would apply.)
+flagged_regions:
+  - eu-west-1
+  - us-east-1
+
+# TODO (Iter 4): decide the rule for a region that appears in NEITHER list.
+# Block it? Quarantine the row? Write your decision here and enforce it in code.
+on_unknown_region: TODO

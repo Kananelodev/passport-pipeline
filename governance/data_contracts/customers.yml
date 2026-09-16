@@ -1,0 +1,48 @@
+# Data contract for the `customers` source.
+# This drives validation (Iter 3) and governance (Iter 4). It is intentionally
+# INCOMPLETE — fill in the TODOs as you build those milestones.
+dataset: customers
+description: Registered customers.
+primary_key: customer_id
+
+columns:
+  - name: customer_id
+    type: string
+    nullable: false
+  - name: first_name
+    type: string
+    nullable: false
+    pii: true
+  - name: last_name
+    type: string
+    nullable: false
+    pii: true
+  - name: sa_id_number
+    type: string
+    nullable: false
+    pii: true
+    # TODO: this must pass an SA ID checksum (Luhn). Add the rule in validate.py.
+    mask: tokenise        # how govern.py should hide it in silver
+  - name: email
+    type: string
+    nullable: false
+    pii: true
+    mask: hash
+    # TODO: add a format rule (contains '@', has a domain).
+  - name: phone
+    type: string
+    nullable: true
+    pii: true
+    mask: partial          # e.g. keep last 3 digits
+    # TODO: expect +27... SA format.
+  - name: province
+    type: string
+    nullable: false
+    # TODO: restrict to the 9 valid SA provinces (allowed-values rule).
+  - name: signup_date
+    type: date
+    nullable: false
+  - name: home_region
+    type: string
+    nullable: false
+    # the region this person's data is allowed to live in

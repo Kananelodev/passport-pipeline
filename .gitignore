@@ -1,0 +1,17 @@
+# Data landing zones — never commit data
+data/raw/*
+data/staging/*
+data/warehouse/*
+!data/**/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+*.duckdb
+*.duckdb.wal
+
+# Env
+.env
