@@ -8,7 +8,7 @@ links so you find current sources yourself (and because links rot).
 - Python `csv` / `faker` library basics.
 - The structure of a **South African ID number** (13 digits: YYMMDD + sequence +
   citizenship + checksum) and the **Luhn checksum** algorithm — you'll validate
-  these later, so generate both valid and invalid ones now.
+  these later, so generate both valid and invalid ones nowg
 
 ## Iteration 1 — warehouse
 - What an **OLAP** columnar warehouse is and why it differs from a transactional DB.
