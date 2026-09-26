@@ -9,11 +9,11 @@ Legend: 🔴 not started · 🟡 in progress · 🟢 done
 
 ---
 
-## Iteration 0 — Environment & sample data  🔴
+## Iteration 0 — Environment & sample data  🟢
 Get the project running and produce data to work with.
 
-- [ ] `make setup` installs cleanly into a venv.
-- [ ] Implement `scripts/generate_sample_data.py` to the spec in its docstring:
+- [x] `make setup` installs cleanly into a venv.
+- [x] Implement `scripts/generate_sample_data.py` to the spec in its docstring:
       writes `data/raw/customers.csv` and `data/raw/transactions.csv` with
       realistic-but-fake SA data (including some deliberately *invalid* rows so
       validation has something to catch).

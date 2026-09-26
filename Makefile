@@ -2,14 +2,21 @@
 # they'll fail until the matching module is implemented. That's expected.
 
 VENV=.venv
-PY=$(VENV)/bin/python
-PIP=$(VENV)/bin/pip
+# Windows venvs put executables in Scripts/, POSIX in bin/.
+ifeq ($(OS),Windows_NT)
+BIN=$(VENV)/Scripts
+else
+BIN=$(VENV)/bin
+endif
+PY=$(BIN)/python
+PIP=$(BIN)/pip
+PYTEST=$(BIN)/pytest
 
 .PHONY: setup seed run test clean shell
 
-setup:              ## create venv + install deps
-	python3 -m venv $(VENV)
-	$(PIP) install --upgrade pip
+setup:
+	python -m venv .venv
+	$(PY) -m pip install --upgrade pip
 	$(PIP) install -r requirements.txt
 	@echo "Done. Copy .env.example to .env, then run 'make seed'."
 
@@ -20,10 +27,10 @@ run:               ## run the full pipeline end-to-end
 	$(PY) -m passport_pipeline.pipeline
 
 test:              ## run the test suite (red until you implement things)
-	$(VENV)/bin/pytest -q
+	$(PYTEST) -q
 
 shell:             ## open a DuckDB SQL shell on the warehouse
-	$(VENV)/bin/python -c "import duckdb,os; duckdb.connect(os.getenv('WAREHOUSE_PATH','data/warehouse/passport.duckdb')).sql('.tables')"
+	$(PY) -c "import duckdb,os; duckdb.connect(os.getenv('WAREHOUSE_PATH','data/warehouse/passport.duckdb')).sql('.tables')"
 
 clean:             ## wipe generated data + warehouse (keeps .gitkeep)
 	find data -type f ! -name '.gitkeep' -delete
