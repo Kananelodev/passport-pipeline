@@ -14,7 +14,7 @@
 | Iteration | Status | Date done | Test file            |
 |-----------|--------|-----------|----------------------|
 | 0 Sample data   | 🟢 | 2026-09-27 | (manual)     |
-| 1 Warehouse     | 🔴 | — | test_warehouse.py   |
+| 1 Warehouse     | 🟢 | — | test_warehouse.py   |
 | 2 Ingest        | 🔴 | — | test_ingest.py      |
 | 3 Validation    | 🔴 | — | test_validate.py    |
 | 4 Governance    | 🔴 | — | test_govern.py      |
@@ -38,12 +38,23 @@
 - Surprise: Had to research about creating a path that would both run on different OS
 - Next: Iteration 1 — warehouse.py + DuckDB schemas.
 
+
+### 2026-09-27: Iteration 1: test_warehouse.py
+- `src/passport_pipeline/warehouse.py` is the one that  enables connection to the DuckDB database `connect` and same with creating sample-data generator I had to make sure that the parent directory existed
+- Had to import `duckdb` to enable us to have access to `DuckDB` database 
+- The reason we are using `DuckDB` is because it's `OLAP` so it's best used for transactions compared to `OLTP` which is best used for analytical. Also it's because it serves as no port, no credentials just a file that can connect to the database with code
+- I also created `create_schemas`, three schemas `bronze`: which we use for auditability and also reprocessing, this means that we can always see the source data and also gives us the ability to go back to the orginal should our cleaning logic break which means we can go the data. `silver`: This is where the data is cleaned and conformed. `gold`: This is when the data is business-aggregates ready
+- Then we create a `run_sql_file` that enables us to read the sql file and execute it against the connection
+
+
 ### YYYY-MM-DD — Scaffold set up
 - Cloned the skeleton, read the roadmap, got `make setup` working.
 - Surprise: No suprises so far
 - Next: Iteration 0 — write the sample-data generator.
 
 <!-- Add new entries above this line, newest first. -->
+
+
 
 ---
 

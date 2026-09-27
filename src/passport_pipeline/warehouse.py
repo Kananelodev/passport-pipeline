@@ -8,7 +8,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-import duckdb  # type: ignore
+import duckdb
+
+from passport_pipeline import config  # type: ignore
 
 
 def connect(db_path: Path | None = None) -> "duckdb.DuckDBPyConnection":
@@ -17,7 +19,11 @@ def connect(db_path: Path | None = None) -> "duckdb.DuckDBPyConnection":
     Use config.WAREHOUSE_PATH when db_path is None. Make sure the parent
     directory exists before connecting.
     """
-    raise NotImplementedError
+
+    target = db_path if db_path is not None else config.WAREHOUSE_PATH
+    target.parent.mkdir(parents=True, exist_ok=True)
+    return duckdb.connect(target.as_posix())
+
 
 
 def create_schemas(con: "duckdb.DuckDBPyConnection") -> None:
@@ -25,7 +31,10 @@ def create_schemas(con: "duckdb.DuckDBPyConnection") -> None:
 
     (In DuckDB these are SCHEMAs: `CREATE SCHEMA IF NOT EXISTS bronze;` etc.)
     """
-    raise NotImplementedError
+    con.execute("CREATE SCHEMA IF NOT EXISTS bronze;")
+    con.execute("CREATE SCHEMA IF NOT EXISTS silver;")
+    con.execute("CREATE SCHEMA IF NOT EXISTS gold;")
+    
 
 
 def run_sql_file(con: "duckdb.DuckDBPyConnection", path: Path) -> None:
@@ -33,4 +42,4 @@ def run_sql_file(con: "duckdb.DuckDBPyConnection", path: Path) -> None:
 
     You'll use this in Iteration 5 to run the files in sql/staging and sql/marts.
     """
-    raise NotImplementedError
+    con.execute(path.read_text(encoding="utf-8"))
