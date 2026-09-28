@@ -8,7 +8,6 @@ import pytest
 from passport_pipeline import ingest, warehouse
 
 
-@pytest.mark.skip(reason="Write me once ingest.ingest_csv works. Remove this skip.")
 def test_ingest_adds_lineage_columns(con, tmp_path):
     warehouse.create_schemas(con)
     csv = tmp_path / "customers.csv"

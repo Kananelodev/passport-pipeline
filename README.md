@@ -74,18 +74,8 @@ tests/                 the executable spec — make these pass
 data/                  bronze/silver/gold landing zones (git-ignored)
 ```
 
-## How I'll present this at BBD
+## WeThinkCode code
 
-The point isn't a finished product — it's showing I can **reason about the job**.
-Talking points I'm building toward (see `PROGRESS.md` for the live version):
+WTC-LSTLLWML
 
-1. *Why medallion layers?* — separation of raw/clean/business, and why you never
-   mutate raw.
-2. *Idempotency* — the pipeline can re-run without duplicating or corrupting data.
-3. *Data quality as a gate* — bad rows get quarantined, not silently dropped.
-4. *The passport angle* — residency tagging + the cross-border report, tied
-   directly to Precious's talk.
-5. *Cloud mapping* — I can point at each local component and name its AWS analogue.
 
-That last one is what makes a student sound like they've thought about the real
-role, not just followed a tutorial.

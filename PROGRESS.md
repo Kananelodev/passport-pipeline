@@ -46,6 +46,16 @@
 - I also created `create_schemas`, three schemas `bronze`: which we use for auditability and also reprocessing, this means that we can always see the source data and also gives us the ability to go back to the orginal should our cleaning logic break which means we can go the data. `silver`: This is where the data is cleaned and conformed. `gold`: This is when the data is business-aggregates ready
 - Then we create a `run_sql_file` that enables us to read the sql file and execute it against the connection
 
+### 2026-09-28: Iteration 2: ingest.py
+- I implemented the `ingest.py` so to enable me to land the the raw CSVs into the the `bronze` tables unedited and unmodified
+- I learned why we have `bronze` as part of the medallion architecture and how `bronze` is more about restraint in terms of not rushing to clean data
+- The reason we have this is for `forensic` so that we have the orginal and other medallions can build from the data
+- Learned about `Data Lineage` which helps us to check where the data came from and also what happened. Implemented those via `_source_file` and `ingested_at` which are our lineage columns
+- Learned about what is `DataFrame` and how to use `pandas` to enable us to read the csv so we can ingest the data into the `warehouse`
+- `con.register("staging_df", df)`: you put a name tag on the `DataFrame` so `DuckDB` can see it. Nothing is copied yet. DuckDB just gets a window onto the data, under the name `staging_df.`
+- `CREATE OR REPLACE TABLE bronze.customers AS SELECT * FROM staging_df`: now you use that name in SQL. This reads everything through the window and `writes` it into a real table in the warehouse. This is the moment the data becomes `permanent.`
+- `con.unregister("staging_df")`: you take the name tag off. The window closes. The table stays, because it was already copied into the warehouse.
+
 
 ### YYYY-MM-DD — Scaffold set up
 - Cloned the skeleton, read the roadmap, got `make setup` working.
