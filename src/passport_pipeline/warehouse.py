@@ -43,3 +43,8 @@ def run_sql_file(con: "duckdb.DuckDBPyConnection", path: Path) -> None:
     You'll use this in Iteration 5 to run the files in sql/staging and sql/marts.
     """
     con.execute(path.read_text(encoding="utf-8"))
+
+
+def fetch_sql_file(con: "duckdb.DuckDBPyConnection", path: Path) -> list[tuple]:
+    """Run a .sql file and return its rows. For checks, the answer is the point."""
+    return con.execute(path.read_text(encoding="utf-8")).fetchall()

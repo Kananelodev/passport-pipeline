@@ -56,6 +56,23 @@
 - `CREATE OR REPLACE TABLE bronze.customers AS SELECT * FROM staging_df`: now you use that name in SQL. This reads everything through the window and `writes` it into a real table in the warehouse. This is the moment the data becomes `permanent.`
 - `con.unregister("staging_df")`: you take the name tag off. The window closes. The table stays, because it was already copied into the warehouse.
 
+### 2026-09-29: Iteration 3: validate.py
+- I got to read about `Data contract` how they live in the version control so they can be seen anyone and it helps with knowing the `shape` of the data
+- It helps in cases where you would have to write a lot fo if statements to check your so instead you write generic rules functions which you can from the file
+- `Schemas-on-write` enforces structure at load time, this is what we would use for our `silver medallion` because that's where we reject the bad data
+`Schemas-on-read` accepts anything and applies structure, this is the one we use for the `bronze medallion` because it accepts everything and brings back without "rejecting" bad data
+- So basically nothing is lost at the door (`bronze`) and nothing that is unverified (`silver`) get's to the layer that analyst use
+- Also went deep into `Data Quality Dimensions` which map to what type of check I am going to create
+- `Completeness`: Is required data present?
+- `Validity`: 	Does it conform to its rules?
+- `Uniqueness`: Any unintended duplicates?
+- `Consistency`: Does it agree across fields/sources?
+- `Referential_Integrity`:  integrity	Do the keys point at something?
+- `Timeliness`: Is it recent enough to be useful?
+- Also learned that `Uniqueness` and `Referential_Integrity` are set-level properties which means that we can't check for them in isolation
+- To account for this we run those checks in `sql` files
+- Being done meant being able to catch bad rows but not only catch that row but also return the reason why it is bad
+
 
 ### YYYY-MM-DD — Scaffold set up
 - Cloned the skeleton, read the roadmap, got `make setup` working.

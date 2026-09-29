@@ -19,17 +19,17 @@ Get the project running and produce data to work with.
       validation has something to catch).
 - **DoD:** `make seed` creates both CSVs; eyeballing them shows valid + invalid rows.
 
-## Iteration 1 — Warehouse & config  🔴
+## Iteration 1 — Warehouse & config  🟢
 - [ ] Implement `warehouse.py`: open/close a DuckDB connection, run a SQL file,
       create the bronze/silver/gold schemas.
 - **DoD:** `test_warehouse.py` green. You can open a DuckDB shell and see the schemas.
 
-## Iteration 2 — Ingest (→ Bronze)  🔴
+## Iteration 2 — Ingest (→ Bronze) 🟢 
 - [ ] Implement `ingest.py`: land the raw CSVs into bronze tables **unchanged**,
       adding only lineage columns (`_ingested_at`, `_source_file`).
 - **DoD:** `test_ingest.py` green. Bronze row counts equal the CSV row counts.
 
-## Iteration 3 — Validation  🔴
+## Iteration 3 — Validation  🟢
 The heart of "data quality as a gate."
 - [ ] Implement `validate.py`: a set of checks driven by the data contracts in
       `governance/data_contracts/`. At minimum: not-null, type, SA-ID checksum,

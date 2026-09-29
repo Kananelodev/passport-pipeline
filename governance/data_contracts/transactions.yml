@@ -15,11 +15,11 @@ columns:
   - name: amount_zar
     type: decimal
     nullable: false
-    # TODO: must be >= 0
+    min: 0
   - name: currency
     type: string
     nullable: false
-    # TODO: allowed values, default 'ZAR'
+    allowed_values: [ZAR]
   - name: merchant
     type: string
     nullable: false

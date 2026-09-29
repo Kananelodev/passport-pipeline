@@ -16,20 +16,20 @@ class TestSaIdChecksum:
     def test_rejects_non_digits(self):
         assert validate.is_valid_sa_id("80010150091AB") is False
 
-    @pytest.mark.skip(reason="Put a hand-verified VALID SA ID here, then un-skip.")
+    # @pytest.mark.skip(reason="Put a hand-verified VALID SA ID here, then un-skip.")
     def test_accepts_valid_id(self):
-        assert validate.is_valid_sa_id("REPLACE_WITH_VALID_13_DIGIT_ID") is True
+        assert validate.is_valid_sa_id("8001015009087") is True
 
-    @pytest.mark.skip(reason="Put an ID with a wrong checksum here, then un-skip.")
+    # @pytest.mark.skip(reason="Put an ID with a wrong checksum here, then un-skip.")
     def test_rejects_bad_checksum(self):
-        assert validate.is_valid_sa_id("REPLACE_WITH_BAD_CHECKSUM_ID") is False
+        assert validate.is_valid_sa_id("8001015009088") is False
 
 
-@pytest.mark.skip(reason="Build validate_dataset, then design this against your contract.")
+# @pytest.mark.skip(reason="Build validate_dataset, then design this against your contract.")
 def test_amount_must_be_non_negative():
     contract = {"dataset": "transactions", "columns": [
-        {"name": "amount_zar", "type": "decimal", "nullable": False},
+        {"name": "amount_zar", "type": "decimal", "nullable": False, "min": 0},
     ]}
-    rows = [{"transaction_id": "T1", "amount_zar": "-5"}]
+    rows = [{"transaction_id": "T1", "amount_zar": -5}]
     violations = validate.validate_dataset(rows, contract)
-    assert any("amount_zar" == v.column for v in violations)
+    assert any(v.column == "amount_zar" and v.rule == "min" for v in violations)
