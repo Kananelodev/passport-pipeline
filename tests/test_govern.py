@@ -15,7 +15,7 @@ def test_masking_actually_hides_value():
     assert "0821234567" not in masked
 
 
-@pytest.mark.skip(reason="Un-skip once classify_transfer + a policy dict are ready.")
+# @pytest.mark.skip(reason="Un-skip once classify_transfer + a policy dict are ready.")
 def test_flags_cross_border():
     policy = {
         "allowed_regions": ["af-south-1"],

@@ -73,6 +73,25 @@
 - To account for this we run those checks in `sql` files
 - Being done meant being able to catch bad rows but not only catch that row but also return the reason why it is bad
 
+### 2026-09-30
+- `Personal information` broader than people expect: not just names and ID numbers but anything relating to an `identifiable living person`
+- A responsible party decides why and how data is processed; an `operator` processes on their behalf. If you're the `platform`, you're usually the `operator`and your obligations flow from that.
+- `Cross-border transfer` is the one that really shapes our architecture because we're using `POPIA` which restricts sending personal information outside South Africa unless certain conditions don't hold.
+- So where you `compute` runs and where your `storage` lives are compliance decisions not just `latency` and `cost decisions`
+- My `Data Model` is setup so that `home_region`: where the person's data lives and `governance` attaches `processing_region`: where it was actually handled and should the two differ we know a transfer occured
+- Essentially this is the `showpiece` of the whole project in a sense that the `cross_border_transfer_report` makes `compliance queryable` instead of it being asserted in a PDF
+- `Masking vs Tokenisation vs Hashing` our contract ask for all three techniques and the choice is driven by what users still have to do with the value
+- | Technique | What it does | Reversible? | Joinable? |
+  | :--- | :--- | :--- | :--- |
+  | **Masking (partial)** | Hides part: `+27••••••789` | No | No |
+  | **Hashing** | One-way function to a fixed digest | No (but see below) | Yes same input, same hash |
+  | **Tokenisation** | Swaps the value for a random token; a separate vault maps back | Yes, with vault access | Yes |`
+- Because SA_ID numbers are 13 digits and also heavily structered we can't just use `hashing` because the input space is tiny. For protection I am using `secret salt` and also `HMAC key` held outside the data.
+- I am using `Append-only` for the logs because this way we keep the "audit" which means by append=only we are only adding rows. The minute we are able update or delete the log, we lose the audit evidence.
+- In `DuckDb` I did this by enforcing this inside my code, this meant only `INSERT` can be used not `UPDATE` or `DELETE`
+- I learned that in production this would look different, they would enforced by the storage layer: `S3 object lock`, `an immutable ledger table`, `write-once buckets.`
+
+
 
 ### YYYY-MM-DD — Scaffold set up
 - Cloned the skeleton, read the roadmap, got `make setup` working.

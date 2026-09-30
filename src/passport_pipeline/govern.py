@@ -6,11 +6,19 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+import hashlib, hmac, os
+import yaml
+import logging
 
+logging.basicConfig(level=logging.INFO)
 
 def pii_columns(contract: dict) -> list[str]:
     """Return the names of columns marked `pii: true` in the contract."""
-    raise NotImplementedError
+    masked_columns = []
+    for column in contract.get("columns", []):
+        if column.get("pii", True):
+            masked_columns.append(column["name"])
+    return masked_columns
 
 
 def mask_value(value: str, strategy: str) -> str:
@@ -24,12 +32,22 @@ def mask_value(value: str, strategy: str) -> str:
     Choose your exact scheme and document it. Consistency matters — the same
     input should mask to the same output across runs (so joins still work).
     """
-    raise NotImplementedError
+    if strategy == "hash":
+        return hashlib.sha256(value.encode()).hexdigest()
+    elif strategy == "tokenise":
+        # Simple deterministic tokenization using HMAC with a secret key
+        secret_key = os.environ.get("TOKENIZATION_KEY", "default_secret_key")
+        return hmac.new(secret_key.encode(), value.encode(), hashlib.sha256).hexdigest()
+    elif strategy == "partial":
+        # Keep only the last 3 characters of the value
+        return value[-3:] if len(value) >= 3 else value
+    else:
+        raise ValueError(f"Unknown masking strategy: {strategy}")
 
 
 def load_residency_policy(path: Path) -> dict[str, Any]:
     """Load residency_policy.yml."""
-    raise NotImplementedError
+    return yaml.safe_load(path.read_text(encoding="utf-8")) or {}
 
 
 def classify_transfer(home_region: str, processing_region: str, policy: dict) -> str:
@@ -39,7 +57,18 @@ def classify_transfer(home_region: str, processing_region: str, policy: dict) ->
     Use the allowed_regions / flagged_regions / on_unknown_region rules from the
     policy. This function is the core of your cross-border report later.
     """
-    raise NotImplementedError
+    allowed_regions = policy.get("allowed_regions", [])
+    flagged_regions = policy.get("flagged_regions", [])
+    on_unknown_region = policy.get("on_unknown_region", "blocked")
+
+    if processing_region == home_region:
+        return "domestic"
+    elif processing_region in allowed_regions:
+        return "domestic"
+    elif processing_region in flagged_regions:
+        return "cross_border_flagged"
+    else:
+        return on_unknown_region
 
 
 def audit(event: str, details: dict) -> None:
@@ -49,4 +78,6 @@ def audit(event: str, details: dict) -> None:
     rows moved cross-border in this run). Append-only — never overwrite history.
     Decide the sink: a table in the warehouse, or a JSONL file. Justify it.
     """
-    raise NotImplementedError
+    logging.info("Audit event: %s, Details: %s", event, details)
+    
+
