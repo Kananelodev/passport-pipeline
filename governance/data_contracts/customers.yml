@@ -13,32 +13,35 @@ columns:
     type: string
     nullable: false
     pii: true
+    mask: drop            # not needed downstream -> never enters silver (minimisation)
   - name: last_name
     type: string
     nullable: false
     pii: true
+    mask: drop
   - name: sa_id_number
     type: string
     nullable: false
     pii: true
-    # TODO: this must pass an SA ID checksum (Luhn). Add the rule in validate.py.
+    sa_id: true           # 13 digits, real YYMMDD date, Luhn checksum
     mask: tokenise        # how govern.py should hide it in silver
   - name: email
     type: string
     nullable: false
     pii: true
+    email: true
     mask: hash
-    # TODO: add a format rule (contains '@', has a domain).
   - name: phone
     type: string
     nullable: true
     pii: true
-    mask: partial          # e.g. keep last 3 digits
-    # TODO: expect +27... SA format.
+    phone: true            # +27 then 9 digits
+    mask: partial          # keep last 3 digits
   - name: province
     type: string
     nullable: false
-    # TODO: restrict to the 9 valid SA provinces (allowed-values rule).
+    allowed_values: [Eastern Cape, Free State, Gauteng, KwaZulu-Natal, Limpopo,
+                     Mpumalanga, North West, Northern Cape, Western Cape]
   - name: signup_date
     type: date
     nullable: false

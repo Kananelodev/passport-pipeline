@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 import re
@@ -84,6 +84,10 @@ def check_type(value, expected):
             int(value)
         elif expected in ("float", "numeric", "decimal"):
             float(value)
+        elif expected == "date":
+            date.fromisoformat(value)
+        elif expected == "timestamp":
+            datetime.fromisoformat(value)
     except ValueError:
         return f"Cannot read '{value}' as {expected}"
     return None
@@ -151,9 +155,9 @@ SET_CHECKS = [
     # (sql file, dataset, column, rule, how to describe one returned row)
     ("duplicate_customer_ids.sql", "customers", "customer_id", "unique",
      lambda r: f"customer_id appears {r[1]} times"),
-    ("duplicate_transaction_ids.sql", "transactions", "transaction_id", "unique",
+    ("duplicate_transactions.sql", "transactions", "transaction_id", "unique",
      lambda r: f"transaction_id appears {r[1]} times"),
-    ("orphan_transactions.sql", "transactions", "customer_id", "referential_integrity",
+    ("orphanage_transactions.sql", "transactions", "customer_id", "referential_integrity",
      lambda r: f"customer_id '{r[1]}' not found in customers"),
 ]
 

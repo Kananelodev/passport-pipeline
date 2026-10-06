@@ -38,7 +38,7 @@ The heart of "data quality as a gate."
 - **DoD:** `test_validate.py` green. Valid rows pass; the seeded bad rows are caught
       and reported with a reason.
 
-## Iteration 4 — Governance  🔴
+## Iteration 4 — Governance 🟢  
 The passport layer.
 - [ ] Implement `govern.py`:
       - PII detection (which columns are personal, from the contract),
@@ -48,7 +48,7 @@ The passport layer.
 - **DoD:** `test_govern.py` green. Masked columns are unreadable in silver; the
       audit log records each run.
 
-## Iteration 5 — Transform (Bronze → Silver → Gold)  🔴
+## Iteration 5 — Transform (Bronze → Silver → Gold)  🟢
 - [ ] Implement `transform.py` + the SQL in `sql/staging/` and `sql/marts/`:
       - **silver**: cleaned, typed, deduped, PII-masked, valid rows only; bad rows
         routed to a `quarantine` table.

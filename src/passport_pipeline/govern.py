@@ -16,7 +16,7 @@ def pii_columns(contract: dict) -> list[str]:
     """Return the names of columns marked `pii: true` in the contract."""
     masked_columns = []
     for column in contract.get("columns", []):
-        if column.get("pii", True):
+        if column.get("pii", False):
             masked_columns.append(column["name"])
     return masked_columns
 

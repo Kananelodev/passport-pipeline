@@ -12,6 +12,7 @@ flagged_regions:
   - eu-west-1
   - us-east-1
 
-# TODO (Iter 4): decide the rule for a region that appears in NEITHER list.
-# Block it? Quarantine the row? Write your decision here and enforce it in code.
-on_unknown_region: TODO
+# A region in NEITHER list is blocked: fail closed. We only process PII where the
+# policy explicitly says we may. Blocked rows are routed to silver.quarantine
+# (rule = residency_blocked) so they're kept as evidence but never reach gold.
+on_unknown_region: blocked

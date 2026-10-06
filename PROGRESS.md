@@ -91,6 +91,27 @@
 - In `DuckDb` I did this by enforcing this inside my code, this meant only `INSERT` can be used not `UPDATE` or `DELETE`
 - I learned that in production this would look different, they would enforced by the storage layer: `S3 object lock`, `an immutable ledger table`, `write-once buckets.`
 
+### 2026-10-06: Iteration 5: transform.py
+- I implemented `transform.py` which takes the data from `bronze` -> `silver` -> `gold`. The actual work lives in `sql/staging` and `sql/marts` and `transform.py` is just the thin Python that runs those SQL files in order
+- I learned that `transform.py` only does the things SQL can't do on its own, it's three steps: `Judge` (run the validator over `bronze` and load every violation into a temp table `contract_violations`), `Equip` (register `govern.py`'s rules as SQL functions) and `Build` (run the staging models then the marts)
+- `con.create_function`: lets you take a Python function and use it inside SQL. I registered `mask_pii` and `classify_transfer` this way so there is only ONE implementation of each rule shared by Python and SQL instead of rewriting the same logic twice and having them drift apart
+- `silver.quarantine` is the one place that decides what is kept out of `silver`. The `stg_*.sql` files just anti-join against it. A row gets quarantined for three reasons:
+- `contract_violations`: the contract is the judge, these come from `validate.py`
+- `parent_quarantined`: a transaction whose customer was rejected. If we don't do this the `gold` joins would silently drop rows
+- `residency_blocked`: processed in a region the policy neither allows nor flags
+- I decided on `on_unknown_region: blocked` which means we `fail closed`. We only process PII where the policy explicitly says we may and the blocked rows go to quarantine so they're kept as evidence but never reach `gold`
+- I don't copy the raw row into quarantine because `bronze` already has it, copying it would spread unmasked PII into a second table. `record_key` + `source_table` is the pointer back to the evidence. Same reason the reasons for PII columns get redacted, otherwise quarantine would leak the very ID numbers and emails that `silver` masks
+- `Data minimisation`: `first_name` and `last_name` got `mask: drop` in the contract because nothing downstream needs them, so they never even enter `silver`
+- Learned about `NOT EXISTS` vs `NOT IN`, if the subquery ever holds a `NULL`, `NOT IN` evaluates to `NULL` for every row and `silver` comes out empty without any error
+- Learned the difference between an exact duplicate and a conflicting one. Exact re-delivered copies just collapse with `DISTINCT`, but the same id with different values is a real problem so that gets quarantined. Had to update the duplicate checks to ignore the lineage columns for this
+- `Idempotency`: every model is `CREATE OR REPLACE` so running it twice rebuilds the same tables instead of appending. Even the favourite merchant ties get broken alphabetically because `mode()` would pick randomly and a mart that changes between identical runs isn't idempotent
+- `GRAIN`: I wrote the grain at the top of every model, like "one row per (txn_date, province)", it forces you to know what one row actually means before you write the query
+- The three `gold` marts: `daily_revenue_by_province`, `customer_transaction_summary` (uses a `LEFT JOIN` so customers with no transactions show up as inactive instead of missing) and the showpiece `cross_border_transfer_report` which answers "whose personal information was processed outside its home region, where and how much" as a query
+- Also built `silver.pii_inventory` from the contracts so it can't drift from them, the cross-border report reads it to say WHICH personal information a transfer touched
+- Surprise: Found a bug in `govern.py` where `column.get("pii", True)` meant every column without the key was treated as PII, had to change the default to `False`
+- `test_transform.py` 16 passed
+- Next: Iteration 6 — orchestrate end-to-end
+
 
 
 ### YYYY-MM-DD — Scaffold set up
