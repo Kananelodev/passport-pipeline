@@ -24,3 +24,9 @@ def test_flags_cross_border():
     }
     assert govern.classify_transfer("af-south-1", "eu-west-1", policy) == "cross_border_flagged"
     assert govern.classify_transfer("af-south-1", "af-south-1", policy) == "domestic"
+
+
+def test_tokenise_fails_closed_without_key(monkeypatch):
+    monkeypatch.delenv("TOKENIZATION_KEY", raising=False)
+    with pytest.raises(RuntimeError):
+        govern.mask_value("9001015009087", "tokenise")

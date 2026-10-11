@@ -35,8 +35,11 @@ def mask_value(value: str, strategy: str) -> str:
     if strategy == "hash":
         return hashlib.sha256(value.encode()).hexdigest()
     elif strategy == "tokenise":
-        # Simple deterministic tokenization using HMAC with a secret key
-        secret_key = os.environ.get("TOKENIZATION_KEY", "default_secret_key")
+        # Deterministic tokenisation using HMAC with a secret key held outside the data.
+        # Fail closed: no key means no tokenising, never a guessable default.
+        secret_key = os.environ.get("TOKENIZATION_KEY")
+        if not secret_key:
+            raise RuntimeError("TOKENIZATION_KEY is not set; refusing to tokenise PII without a secret key")
         return hmac.new(secret_key.encode(), value.encode(), hashlib.sha256).hexdigest()
     elif strategy == "partial":
         # Keep only the last 3 characters of the value

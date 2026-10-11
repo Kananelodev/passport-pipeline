@@ -3,11 +3,15 @@
 Add fixtures here as you need them — e.g. an in-memory DuckDB connection, or a
 few sample rows. Kept minimal on purpose; grow it to serve your tests.
 """
+import os
 import runpy
 from pathlib import Path
 
 import duckdb  # type: ignore
 import pytest
+
+# Test-only key so tokenisation runs; real runs must supply their own via .env.
+os.environ.setdefault("TOKENIZATION_KEY", "test-only-not-a-secret")
 
 GENERATOR = Path(__file__).resolve().parents[1] / "scripts" / "generate_sample_data.py"
 
