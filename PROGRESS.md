@@ -14,12 +14,12 @@
 | Iteration | Status | Date done | Test file            |
 |-----------|--------|-----------|----------------------|
 | 0 Sample data   | 🟢 | 2026-09-27 | (manual)     |
-| 1 Warehouse     | 🟢 | — | test_warehouse.py   |
-| 2 Ingest        | 🔴 | — | test_ingest.py      |
-| 3 Validation    | 🔴 | — | test_validate.py    |
-| 4 Governance    | 🔴 | — | test_govern.py      |
-| 5 Transform     | 🔴 | — | test_transform.py   |
-| 6 Orchestration | 🔴 | — | test_pipeline.py    |
+| 1 Warehouse     | 🟢 | 2026-09-27 | test_warehouse.py   |
+| 2 Ingest        | 🟢 | 2026-09-28 | test_ingest.py      |
+| 3 Validation    | 🟢 | 2026-09-29 | test_validate.py    |
+| 4 Governance    | 🟢 | 2026-09-30 | test_govern.py      |
+| 5 Transform     | 🟢 | 2026-10-06 | test_transform.py   |
+| 6 Orchestration | 🟢 | 2026-10-11 | test_pipeline.py    |
 
 ---
 

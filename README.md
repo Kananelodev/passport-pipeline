@@ -1,5 +1,7 @@
 # passport-pipeline
 
+[![CI](https://github.com/Kananelodev/passport-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/Kananelodev/passport-pipeline/actions/workflows/ci.yml)
+
 > *"Your database has a passport."* — Precious Mamotingoe Lesupi, BBD Escape
 >
 > A local-first batch data pipeline that treats data residency, PII, and trust
@@ -52,15 +54,17 @@ stretch milestones once the primitives work.
 
 ## Status
 
-This repo ships as a **scaffold**: structure, contracts, docstrings, and a full
-test suite that currently **fails on purpose**. My job is to turn the suite green,
-one module at a time. See [`ROADMAP.md`](ROADMAP.md) for the build order and
-[`PROGRESS.md`](PROGRESS.md) for where I actually am.
+**All six iterations are complete. The full test suite passes, and CI runs it plus
+the end-to-end pipeline on every push.** The repo started as a scaffold with a test
+suite that failed on purpose, and I implemented one module at a time until it went green.
+[`ROADMAP.md`](ROADMAP.md) has the build order and [`PROGRESS.md`](PROGRESS.md) has a
+dated log of what I built and learned at each step.
 
 ```bash
 make setup     # create venv + install deps
-make test      # run the suite — everything red at the start
-make run       # run the pipeline end-to-end (fails at first unbuilt stage)
+make seed      # generate deterministic synthetic SA data
+make test      # run the suite
+make run       # run the pipeline end-to-end: ingest → validate → govern → transform
 ```
 
 ## Repo layout

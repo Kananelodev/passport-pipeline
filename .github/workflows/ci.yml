@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run test suite
+        run: pytest -q
+      - name: Run pipeline end-to-end
+        env:
+          PYTHONPATH: src
+          TOKENIZATION_KEY: ci-only-not-a-secret
+        run: |
+          python scripts/generate_sample_data.py
+          python -m passport_pipeline.pipeline
