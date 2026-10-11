@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Query the Passport</title>
+<meta name="description" content="Run SQL against the passport-pipeline warehouse in your browser. DuckDB-WASM over the published silver and gold layers. Bronze stays private because it holds raw PII.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cover: #16233b;
+    --cover-hi: #22355a;
+    --gold: #c9a95c;
+    --paper: #f3eddf;
+    --paper-2: #fbf8f0;
+    --ink: #24262b;
+    --muted: #6d6a62;
+    --rule: #d9cfb8;
+    --us: #b0281d;
+    --af: #1d6b57;
+    --text-on-cover: #ece6d6;
+    --text-on-cover-muted: #a9b2c4;
+    --serif: "Fraunces", Georgia, serif;
+    --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; min-height: 100vh;
+    background: radial-gradient(120% 70% at 50% 0%, var(--cover-hi), var(--cover) 60%);
+    background-color: var(--cover);
+    color: var(--text-on-cover);
+    font: 14px/1.5 var(--mono);
+  }
+  a { color: var(--gold); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 24px 56px; }
+  .nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font-size: 12px; margin-bottom: 28px; }
+  .nav a { text-decoration: none; }
+  .nav a:hover { text-decoration: underline; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); margin: 0 0 10px; }
+  h1 { font: 700 clamp(30px, 5vw, 46px)/1.05 var(--serif); margin: 0 0 12px; }
+  .lede { max-width: 70ch; color: var(--text-on-cover-muted); margin: 0 0 28px; }
+
+  .layout { display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 20px; align-items: start; }
+  .card { background: var(--paper); color: var(--ink); border-radius: 12px; box-shadow: 0 20px 40px -20px rgba(0,0,0,.55); }
+
+  /* schema browser */
+  .schema { padding: 16px; position: sticky; top: 16px; }
+  .schema h2, .panel-h { font: 600 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .schema h3 { font: 600 12px/1 var(--mono); margin: 16px 0 6px; letter-spacing: .06em; }
+  .schema h3:first-of-type { margin-top: 4px; }
+  details { border-bottom: 1px solid var(--rule); }
+  summary { cursor: pointer; padding: 6px 0; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  summary::before { content: "▸"; color: var(--muted); margin-right: 2px; transition: transform .15s; display: inline-block; }
+  details[open] summary::before { transform: rotate(90deg); }
+  summary span:first-child { min-width: 0; overflow-wrap: anywhere; }
+  summary .n { flex: none; color: var(--muted); font-size: 11px; margin-left: auto; font-variant-numeric: tabular-nums; }
+  details ul { list-style: none; margin: 0 0 8px 14px; padding: 0; font-size: 11.5px; }
+  details li { display: flex; justify-content: space-between; gap: 8px; padding: 1px 0; }
+  details li span:last-child { color: var(--muted); }
+  details button { font: inherit; font-size: 11px; color: var(--af); background: none; border: 0; padding: 2px 0 8px 14px; cursor: pointer; text-decoration: underline; }
+  .locked { margin-top: 14px; padding: 10px 12px; border: 1px dashed var(--us); border-radius: 8px; font-size: 11.5px; color: var(--muted); }
+  .locked b { color: var(--us); }
+
+  /* editor */
+  .main { display: grid; gap: 16px; min-width: 0; }
+  .editor { padding: 16px; }
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .presets button {
+    font: inherit; font-size: 12px; cursor: pointer; color: var(--ink);
+    background: var(--paper-2); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px;
+  }
+  .presets button:hover { border-color: var(--ink); }
+  .presets button.warn { border-style: dashed; border-color: var(--us); color: var(--us); }
+  textarea {
+    width: 100%; min-height: 168px; resize: vertical; display: block;
+    font: 13.5px/1.6 var(--mono); color: var(--ink); background: var(--paper-2);
+    border: 1px solid var(--rule); border-radius: 8px; padding: 12px 14px; tab-size: 4;
+  }
+  textarea:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .bar { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+  .run {
+    font: 600 13px/1 var(--mono); cursor: pointer; color: var(--paper); background: var(--cover);
+    border: 0; border-radius: 8px; padding: 10px 18px;
+  }
+  .run:disabled { opacity: .5; cursor: progress; }
+  .hint { font-size: 11.5px; color: var(--muted); }
+  .share { font: inherit; font-size: 12px; background: none; border: 0; color: var(--af); cursor: pointer; text-decoration: underline; margin-left: auto; padding: 0; }
+  .status { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .status i { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); display: inline-block; }
+  .status.ready i { background: var(--af); }
+  .status.err i { background: var(--us); }
+
+  /* results */
+  .results { padding: 0; overflow: hidden; }
+  .results-head { display: flex; justify-content: space-between; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--rule); flex-wrap: wrap; }
+  .results-head .panel-h { margin: 0; }
+  .meta { font-size: 11.5px; color: var(--muted); }
+  .scroll { overflow: auto; max-height: 560px; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 6px 14px; border-bottom: 1px solid var(--rule); white-space: nowrap; max-width: 360px; overflow: hidden; text-overflow: ellipsis; }
+  th { position: sticky; top: 0; background: var(--paper); font-weight: 600; z-index: 1; }
+  th small { display: block; font-weight: 400; color: var(--muted); font-size: 10px; letter-spacing: .04em; }
+  td.num { text-align: right; }
+  th.num { text-align: right; }
+  td.null { color: var(--muted); font-style: italic; }
+  tbody tr:hover td { background: var(--paper-2); }
+  .empty { padding: 28px 16px; color: var(--muted); font-size: 13px; }
+  .error { padding: 16px; color: var(--us); white-space: pre-wrap; font-size: 12.5px; }
+  .error .why { display: block; margin-top: 10px; color: var(--ink); }
+
+  footer { margin-top: 40px; font-size: 12px; color: var(--text-on-cover-muted); border-top: 1px solid rgba(201,169,92,.2); padding-top: 16px; }
+
+  @media (max-width: 860px) {
+    .layout { grid-template-columns: 1fr; }
+    .schema { position: static; order: 2; }
+  }
+  @media (max-width: 480px) {
+    .wrap { padding: 24px 16px 40px; }
+    .share { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav">
+    <a href="./">← The passport</a>
+    <a href="https://github.com/Kananelodev/passport-pipeline">github.com/Kananelodev/passport-pipeline</a>
+  </nav>
+  <p class="eyebrow">passport-pipeline · DuckDB in your browser</p>
+  <h1>Query the passport.</h1>
+  <p class="lede">The silver and gold layers of the warehouse, loaded into DuckDB running in this tab.
+    The query runs on your machine and nothing is sent to a server. Pick a question or write your own SQL.</p>
+
+  <div class="layout">
+    <aside class="card schema" aria-label="Tables">
+      <h2>Warehouse</h2>
+      <div id="tables"><p class="hint">Loading tables…</p></div>
+      <div class="locked"><b>bronze.*</b> is not published. It holds the raw rows with unmasked PII, so it stays in the warehouse.</div>
+    </aside>
+
+    <div class="main">
+      <section class="card editor" aria-label="SQL editor">
+        <div class="presets" id="presets"></div>
+        <label for="sql" class="panel-h">SQL</label>
+        <textarea id="sql" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+        <div class="bar">
+          <button class="run" id="run" disabled>Run ▸</button>
+          <span class="hint">Ctrl/⌘ + Enter</span>
+          <span class="status" id="status" role="status"><i></i><span>Starting DuckDB-WASM…</span></span>
+          <button class="share" id="share" type="button">Copy link to this query</button>
+        </div>
+      </section>
+
+      <section class="card results" aria-label="Results" aria-live="polite">
+        <div class="results-head"><h2 class="panel-h">Result</h2><span class="meta" id="meta"></span></div>
+        <div id="out"><div class="empty">Run a query to see rows here.</div></div>
+      </section>
+    </div>
+  </div>
+
+  <footer>Synthetic data, rebuilt by CI on every push using a test-only tokenisation key. DuckDB-WASM loads from jsDelivr.</footer>
+</div>
+
+<script type="module">
+import * as duckdb from "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.29.0/+esm";
+
+const PRESETS = [
+  { label: "The showpiece report", sql:
+`-- Whose personal information left af-south-1, where, and how much?
+SELECT transfer_month, processing_region, transfer_count,
+       data_subjects_affected, amount_zar, pct_of_month_txns
+FROM gold.cross_border_transfer_report
+ORDER BY transfer_month, processing_region;` },
+  { label: "Transfers by region", sql:
+`SELECT processing_region,
+       SUM(transfer_count)         AS transfers,
+       SUM(data_subjects_affected) AS subject_months,
+       ROUND(SUM(amount_zar), 2)   AS amount_zar
+FROM gold.cross_border_transfer_report
+GROUP BY processing_region
+ORDER BY transfers DESC;` },
+  { label: "Is the PII really masked?", sql:
+`-- SA ID = HMAC token, email = SHA-256, phone = last 3 digits.
+-- first_name / last_name were dropped before silver (data minimisation).
+SELECT customer_id, sa_id_number, email, phone, province
+FROM silver.customers
+LIMIT 10;` },
+  { label: "What did quarantine catch?", sql:
+`-- Every row kept out of silver, and the rule that stopped it.
+SELECT source_table, rule, COUNT(*) AS rows_quarantined
+FROM silver.quarantine
+GROUP BY ALL
+ORDER BY rows_quarantined DESC;` },
+  { label: "Revenue by province", sql:
+`SELECT province,
+       SUM(transaction_count)       AS transactions,
+       ROUND(SUM(revenue_zar), 2)   AS revenue_zar
+FROM gold.daily_revenue_by_province
+GROUP BY province
+ORDER BY revenue_zar DESC;` },
+  { label: "Try to read bronze", warn: true, sql:
+`-- Go on, try it.
+SELECT * FROM bronze.customers LIMIT 5;` },
+];
+
+const $ = id => document.getElementById(id);
+const sqlBox = $("sql"), runBtn = $("run"), statusEl = $("status");
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+let conn = null;
+
+function setStatus(text, kind = "") {
+  statusEl.className = `status ${kind}`;
+  statusEl.querySelector("span").textContent = text;
+}
+
+function presets() {
+  $("presets").innerHTML = PRESETS.map((p, i) =>
+    `<button type="button" data-i="${i}" class="${p.warn ? "warn" : ""}">${esc(p.label)}</button>`).join("");
+  $("presets").addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    sqlBox.value = PRESETS[b.dataset.i].sql;
+    run();
+  });
+}
+
+function schemaBrowser(manifest) {
+  const bySchema = {};
+  for (const t of manifest) (bySchema[t.schema] ||= []).push(t);
+  $("tables").innerHTML = Object.entries(bySchema).map(([schema, tables]) => `
+    <h3>${esc(schema)}</h3>
+    ${tables.map(t => `<details>
+      <summary><span>${esc(t.table)}</span><span class="n">${t.rows.toLocaleString("en-ZA")}</span></summary>
+      <ul>${t.columns.map(c => `<li><span>${esc(c.name)}</span><span>${esc(c.type.toLowerCase())}</span></li>`).join("")}</ul>
+      <button type="button" data-q="${esc(`SELECT * FROM ${t.schema}.${t.table} LIMIT 50;`)}">Preview rows</button>
+    </details>`).join("")}`).join("");
+  $("tables").addEventListener("click", e => {
+    const b = e.target.closest("button[data-q]");
+    if (!b) return;
+    sqlBox.value = b.dataset.q;
+    run();
+  });
+}
+
+function fmt(v, type) {
+  if (v === null || v === undefined) return { text: "NULL", cls: "null" };
+  if (type.startsWith("Date")) return { text: new Date(Number(v)).toISOString().slice(0, 10) };
+  if (type.startsWith("Timestamp")) return { text: new Date(Number(v)).toISOString().slice(0, 19).replace("T", " ") };
+  if (typeof v === "bigint") return { text: v.toString(), cls: "num" };
+  if (typeof v === "number") return { text: Number.isInteger(v) ? String(v) : v.toFixed(2), cls: "num" };
+  if (typeof v === "object") return { text: JSON.stringify(v, (_, x) => typeof x === "bigint" ? x.toString() : x) };
+  return { text: String(v) };
+}
+
+const MAX_ROWS = 500;
+
+function renderTable(table, ms) {
+  const fields = table.schema.fields;
+  const types = fields.map(f => String(f.type));
+  const rows = table.toArray();
+  $("meta").textContent = `${rows.length.toLocaleString("en-ZA")} row${rows.length === 1 ? "" : "s"} · ${ms.toFixed(0)} ms${rows.length > MAX_ROWS ? ` · showing first ${MAX_ROWS}` : ""}`;
+  if (!fields.length) { $("out").innerHTML = `<div class="empty">Statement ran. No rows returned.</div>`; return; }
+  const numeric = types.map(t => /^(Int|Uint|Float|Decimal)/.test(t));
+  const head = fields.map((f, i) => `<th class="${numeric[i] ? "num" : ""}">${esc(f.name)}<small>${esc(types[i].toLowerCase())}</small></th>`).join("");
+  const body = rows.slice(0, MAX_ROWS).map(r => {
+    const obj = r.toJSON();
+    return `<tr>${fields.map((f, i) => {
+      const { text, cls = "" } = fmt(obj[f.name], types[i]);
+      return `<td class="${cls}" title="${esc(text)}">${esc(text)}</td>`;
+    }).join("")}</tr>`;
+  }).join("");
+  $("out").innerHTML = `<div class="scroll"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`;
+}
+
+async function run() {
+  const sql = sqlBox.value.trim();
+  if (!conn || !sql) return;
+  runBtn.disabled = true;
+  history.replaceState(null, "", `#sql=${encodeURIComponent(sql)}`);
+  const t0 = performance.now();
+  try {
+    const result = await conn.query(sql);
+    renderTable(result, performance.now() - t0);
+  } catch (err) {
+    $("meta").textContent = "";
+    const why = /bronze/i.test(sql)
+      ? `<span class="why">That's by design. Bronze holds the raw rows: real-format SA ID numbers, emails, names. It's the audit copy, so it never leaves the warehouse. Everything published here has been through the contract checks and masking in silver.</span>`
+      : "";
+    $("out").innerHTML = `<div class="error">${esc(err.message || err)}${why}</div>`;
+  } finally {
+    runBtn.disabled = false;
+  }
+}
+
+async function boot() {
+  presets();
+  const fromHash = new URLSearchParams(location.hash.slice(1)).get("sql");
+  sqlBox.value = fromHash || PRESETS[0].sql;
+
+  try {
+    const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
+    const workerUrl = URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: "text/javascript" }));
+    const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), new Worker(workerUrl));
+    await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+    URL.revokeObjectURL(workerUrl);
+    conn = await db.connect();
+
+    setStatus("Loading tables…");
+    const manifest = await (await fetch("data/tables.json")).json();
+    for (const schema of new Set(manifest.map(t => t.schema))) await conn.query(`CREATE SCHEMA IF NOT EXISTS ${schema}`);
+    await Promise.all(manifest.map(async t => {
+      const buf = new Uint8Array(await (await fetch(`data/${t.file}`)).arrayBuffer());
+      await db.registerFileBuffer(t.file, buf);
+    }));
+    for (const t of manifest) await conn.query(`CREATE VIEW ${t.schema}.${t.table} AS SELECT * FROM read_parquet('${t.file}')`);
+
+    schemaBrowser(manifest);
+    setStatus(`Ready · ${manifest.length} tables`, "ready");
+    runBtn.disabled = false;
+    run();
+  } catch (err) {
+    setStatus("DuckDB failed to start", "err");
+    $("out").innerHTML = `<div class="error">${esc(err.message || err)}<span class="why">This page needs a browser with WebAssembly and Web Workers, served over http(s). Opening the file directly from disk won't work: run <code>python -m http.server -d site</code> and visit localhost:8000/query.html.</span></div>`;
+  }
+}
+
+runBtn.addEventListener("click", run);
+sqlBox.addEventListener("keydown", e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); }
+});
+$("share").addEventListener("click", async () => {
+  const url = `${location.origin}${location.pathname}#sql=${encodeURIComponent(sqlBox.value.trim())}`;
+  try { await navigator.clipboard.writeText(url); $("share").textContent = "Link copied"; }
+  catch { history.replaceState(null, "", url); $("share").textContent = "Link is in the address bar"; }
+  setTimeout(() => { $("share").textContent = "Copy link to this query"; }, 2000);
+});
+
+boot();
+</script>
+</body>
+</html>

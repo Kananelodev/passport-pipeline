@@ -15,3 +15,6 @@ venv/
 
 # Env
 .env
+
+# Generated GitHub Pages site (built in CI, never committed)
+site/

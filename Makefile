@@ -12,7 +12,7 @@ PY=$(BIN)/python
 PIP=$(BIN)/pip
 PYTEST=$(BIN)/pytest
 
-.PHONY: setup seed run test clean shell
+.PHONY: setup seed run test site clean shell
 
 setup:
 	python -m venv .venv
@@ -26,6 +26,9 @@ seed:               ## generate sample data (needs scripts/generate_sample_data.
 run: export PYTHONPATH=src   # mirror pytest's pythonpath; the package isn't pip-installed
 run:               ## run the full pipeline end-to-end
 	$(PY) -m passport_pipeline.pipeline
+
+site:              ## build the GitHub Pages site into site/ (needs `make run`)
+	$(PY) scripts/build_site.py
 
 test:              ## run the test suite (red until you implement things)
 	$(PYTEST) -q

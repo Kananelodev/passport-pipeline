@@ -13,6 +13,16 @@ fundamentals before moving to cloud-specific certs and roles. It's deliberately
 **local-first and free to run** (no paid AWS account needed), but structured so
 that every stage maps cleanly onto managed cloud services later.
 
+## See it live
+
+- **[The passport](https://kananelodev.github.io/passport-pipeline/)**: every cross-border transfer in the gold layer, stamped into its data subject's passport.
+- **[Query the passport](https://kananelodev.github.io/passport-pipeline/query.html)**: run SQL against silver and gold in your browser (DuckDB-WASM). Bronze is deliberately not published.
+
+[![A data passport: masked identity on the left, cross-border transfer stamps on the right](assets/passport.png)](https://kananelodev.github.io/passport-pipeline/)
+
+Both pages are rebuilt by CI on every push (`make site` locally) with a test-only
+tokenisation key, so nothing derived from a real key is ever published.
+
 ---
 
 ## The idea
