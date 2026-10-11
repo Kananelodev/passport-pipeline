@@ -112,6 +112,14 @@
 - `test_transform.py` 16 passed
 - Next: Iteration 6 — orchestrate end-to-end
 
+### 2026-10-11: iteration 6: pipeline.py
+- Finished iteration 6 where I basically checking if my pipeline actually ran
+- It had to run in a specific way by this mean I mean it had to uphold `idempotency` throughout every run
+- I used the `Truncate and Reload` strategy which basically deleted everything and built from our source data with each run
+- I used this strategy because our pipeline fits comfortably and it's not big enough to consider using the `MERGE` strategy and thus enables us to keep idempotency within our pipeline
+- Had to add extensive `logging` to basically entail how our pipeline is at every stage: `ingest` - `validate` - `govern` and `transform`
+- There is a part where I am violating our `idempotency` rule which is in my `audit`, I did this because I'm using append-only design which means that I want my audit to show what the data looks like at that point and it's not going to be the same everytime
+
 
 
 ### YYYY-MM-DD — Scaffold set up

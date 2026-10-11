@@ -10,7 +10,6 @@ from __future__ import annotations
 import logging
 
 from . import config, ingest, transform, warehouse
-# from . import validate, govern   # bring these in as you build them
 
 logging.basicConfig(level=config.LOG_LEVEL)
 log = logging.getLogger("pipeline")
@@ -26,9 +25,9 @@ def run() -> None:
     counts = ingest.ingest_all(con)
     log.info("Bronze row counts: %s", counts)
 
-    # TODO Iter 3: run validation, quarantine bad rows, log a quality summary.
-    # TODO Iter 4: apply governance (masking + residency), write the audit entry.
-
+    # Validation (Iter 3) and governance (Iter 4) run inside build_silver:
+    # it judges bronze against the contracts, quarantines bad rows, masks PII,
+    # classifies residency, and writes the audit entry.
     log.info("Transforming bronze -> silver -> gold")
     transform.build_silver(con)
     transform.build_gold(con)

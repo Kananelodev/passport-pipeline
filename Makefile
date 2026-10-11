@@ -23,6 +23,7 @@ setup:
 seed:               ## generate sample data (needs scripts/generate_sample_data.py)
 	$(PY) scripts/generate_sample_data.py
 
+run: export PYTHONPATH=src   # mirror pytest's pythonpath; the package isn't pip-installed
 run:               ## run the full pipeline end-to-end
 	$(PY) -m passport_pipeline.pipeline
 

@@ -57,7 +57,7 @@ The passport layer.
         `cross_border_transfer_report`.
 - **DoD:** `test_transform.py` green. The three marts exist and return sensible rows.
 
-## Iteration 6 — Orchestrate end-to-end  🔴
+## Iteration 6 — Orchestrate end-to-end  🟢
 - [ ] Finish `pipeline.py`: run seed → ingest → validate → govern → transform in
       order, with logging, and make it **idempotent** (re-running gives the same
       result, no duplicates).

@@ -1,17 +1,14 @@
 """Iteration 5 — bronze -> silver -> gold, end to end on freshly seeded data.
 
-The fixture runs the real generator into a temp folder (so the tests don't depend
+The raw_dir fixture (conftest.py) runs the real generator into a temp folder (so the tests don't depend
 on `make seed` having been run), ingests it, and builds silver + gold once.
 """
-import runpy
 from pathlib import Path
 
 import duckdb  # type: ignore
 import pytest
 
 from passport_pipeline import config, govern, ingest, transform, validate, warehouse
-
-GENERATOR = Path(__file__).resolve().parents[1] / "scripts" / "generate_sample_data.py"
 
 # What the generator injects (see its docstring) -> the rule that must catch it.
 EXPECTED_QUARANTINE = {
@@ -29,13 +26,6 @@ MARTS = ["daily_revenue_by_province", "customer_transaction_summary",
          "cross_border_transfer_report"]
 
 
-def _seed(raw_dir: Path) -> None:
-    """Run the generator fresh (its RNG seeds at import) into raw_dir."""
-    module = runpy.run_path(str(GENERATOR), run_name="generator")
-    module["main"].__globals__["RAW_DIR"] = raw_dir
-    module["main"]()
-
-
 def _build(raw_dir: Path) -> "duckdb.DuckDBPyConnection":
     con = duckdb.connect(":memory:")
     warehouse.create_schemas(con)
@@ -44,13 +34,6 @@ def _build(raw_dir: Path) -> "duckdb.DuckDBPyConnection":
     transform.build_silver(con)
     transform.build_gold(con)
     return con
-
-
-@pytest.fixture(scope="module")
-def raw_dir(tmp_path_factory):
-    path = tmp_path_factory.mktemp("raw")
-    _seed(path)
-    return path
 
 
 @pytest.fixture(scope="module")
