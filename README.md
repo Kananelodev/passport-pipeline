@@ -20,8 +20,11 @@ that every stage maps cleanly onto managed cloud services later.
 
 [![A data passport: masked identity on the left, cross-border transfer stamps on the right](assets/passport.png)](https://kananelodev.github.io/passport-pipeline/)
 
-Both pages are rebuilt by CI on every push (`make site` locally) with a test-only
-tokenisation key, so nothing derived from a real key is ever published.
+Both pages are rebuilt by CI on every push with a test-only tokenisation key, so
+nothing derived from a real key is ever published. To preview them locally, run
+`make run`, then `make site`, then `make serve`, and open http://localhost:8000. The query console
+needs to be served over http: opening `site/query.html` straight from disk won't
+start DuckDB-WASM.
 
 ---
 
@@ -75,6 +78,8 @@ make setup     # create venv + install deps
 make seed      # generate deterministic synthetic SA data
 make test      # run the suite
 make run       # run the pipeline end-to-end: ingest → validate → govern → transform
+make site      # build the GitHub Pages site into site/
+make serve     # preview it at http://localhost:8000
 ```
 
 ## Repo layout

@@ -12,7 +12,7 @@ PY=$(BIN)/python
 PIP=$(BIN)/pip
 PYTEST=$(BIN)/pytest
 
-.PHONY: setup seed run test site clean shell
+.PHONY: setup seed run test site serve clean shell
 
 setup:
 	python -m venv .venv
@@ -29,6 +29,9 @@ run:               ## run the full pipeline end-to-end
 
 site:              ## build the GitHub Pages site into site/ (needs `make run`)
 	$(PY) scripts/build_site.py
+
+serve:             ## preview the built site at http://localhost:8000 (needs `make site`)
+	$(PY) -m http.server 8000 -d site
 
 test:              ## run the test suite (red until you implement things)
 	$(PYTEST) -q
